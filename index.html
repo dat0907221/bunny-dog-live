@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunny Dog | Minecraft Streamer Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        discord: '#5865F2',
+                        youtube: '#FF0000',
+                        minecraft: '#22c55e',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 3s infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        },
+                        glow: {
+                            '0%': { filter: 'drop-shadow(0 0 15px rgba(34, 197, 94, 0.5))' },
+                            '100%': { filter: 'drop-shadow(0 0 35px rgba(168, 85, 247, 0.8))' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Hide Default Cursor on Desktop for Custom Glowing Cursor */
+        @media (min-width: 768px) {
+            * {
+                cursor: none !important;
+            }
+        }
+
+        body {
+            background-color: #07090e;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism styling */
+        .glass-card {
+            background: rgba(13, 20, 36, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card-interactive {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .glass-card-interactive:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(34, 197, 94, 0.5);
+            box-shadow: 0 20px 40px -15px rgba(34, 197, 94, 0.25);
+        }
+
+        /* Neon Glowing Borders */
+        .neon-border-yt {
+            position: relative;
+        }
+        .neon-border-yt::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #ff0000);
+            border-radius: 1.25rem;
+            z-index: -1;
+            opacity: 0.7;
+            filter: blur(8px);
+            transition: opacity 0.3s;
+        }
+        .neon-border-yt:hover::before {
+            opacity: 1;
+            filter: blur(14px);
+        }
+
+        .neon-border-discord {
+            position: relative;
+        }
+        .neon-border-discord::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, #5865F2, #a855f7, #22c55e);
+            border-radius: 1.25rem;
+            z-index: -1;
+            opacity: 0.7;
+            filter: blur(8px);
+            transition: opacity 0.3s;
+        }
+        .neon-border-discord:hover::before {
+            opacity: 1;
+            filter: blur(14px);
+        }
+
+        .neon-border-green {
+            position: relative;
+        }
+        .neon-border-green::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, #22c55e, #38bdf8, #a855f7);
+            border-radius: 1.25rem;
+            z-index: -1;
+            opacity: 0.7;
+            filter: blur(8px);
+            transition: opacity 0.3s;
+        }
+        .neon-border-green:hover::before {
+            opacity: 1;
+            filter: blur(14px);
+        }
+
+        /* Custom Cursor Elements */
+        #cursor-dot {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 12px #22c55e, 0 0 20px #22c55e;
+            transition: transform 0.05s ease-out, background-color 0.2s, width 0.2s, height 0.2s;
+        }
+
+        #cursor-ring {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 38px;
+            height: 38px;
+            border: 2px solid rgba(34, 197, 94, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: transform 0.15s ease-out, border-color 0.2s, width 0.2s, height 0.2s;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Canvas Particle Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Particle Trail */
+        .trail-particle {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 9997;
+            animation: fadeOutTrail 0.8s forwards ease-out;
+        }
+
+        @keyframes fadeOutTrail {
+            0% {
+                opacity: 0.9;
+                transform: scale(1) translate(-50%, -50%);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.1) translate(-50%, -50%);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-black">
+
+    <!-- AUDIO ELEMENT FROM GOOGLE DRIVE -->
+    <audio id="bg-audio" loop preload="auto">
+        <source src="https://docs.google.com/uc?export=download&id=1H-nEBj2WU1cwPHijeLGo6TmHBggeu9Pd" type="audio/mpeg">
+        <source src="https://drive.google.com/uc?export=download&id=1H-nEBj2WU1cwPHijeLGo6TmHBggeu9Pd" type="audio/mp3">
+    </audio>
+
+    <!-- CANVAS BACKGROUND -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- CUSTOM CURSOR ELEMENTS -->
+    <div id="cursor-dot" class="hidden md:block"></div>
+    <div id="cursor-ring" class="hidden md:block"></div>
+
+    <!-- BACKGROUND GLOW ORBS -->
+    <div class="fixed top-1/4 left-10 w-96 h-96 bg-emerald-600/15 rounded-full blur-[130px] pointer-events-none animate-pulse-slow"></div>
+    <div class="fixed bottom-1/4 right-10 w-96 h-96 bg-purple-600/15 rounded-full blur-[130px] pointer-events-none animate-pulse-slow" style="animation-delay: 2s;"></div>
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-40 w-full glass-card border-b border-slate-800/80 px-4 lg:px-8 py-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#hero" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-purple-600 p-0.5 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
+                    <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-bold text-lg text-emerald-400">
+                        🟩
+                    </div>
+                </div>
+                <span class="text-xl font-extrabold tracking-wider bg-gradient-to-r from-emerald-400 via-teal-300 to-purple-400 bg-clip-text text-transparent">
+                    BUNNY DOG
+                </span>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden sm:flex items-center gap-6 text-sm font-semibold text-slate-300">
+                <a href="#hero" class="hover:text-emerald-400 transition-colors">Trang Chủ</a>
+                <a href="#schedule" class="hover:text-emerald-400 transition-colors">Lịch Stream</a>
+                <a href="#socials" class="hover:text-emerald-400 transition-colors">Kênh & Cộng Đồng</a>
+            </nav>
+
+            <!-- Audio Control Button -->
+            <button id="bg-sound-btn" class="px-4 py-2 rounded-xl glass-card text-xs font-semibold text-emerald-300 border border-emerald-500/30 hover:border-emerald-400 hover:bg-emerald-500/10 transition-all flex items-center gap-2">
+                <i id="sound-icon" class="fas fa-play text-emerald-400"></i>
+                <span id="sound-btn-text">Bật Nhạc</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-24">
+
+        <!-- HERO SECTION -->
+        <section id="hero" class="pt-8 sm:pt-16 flex flex-col items-center text-center relative">
+            
+            <!-- Avatar with Cyber Glow Frame -->
+            <div class="relative mb-8 group">
+                <div class="absolute -inset-2 bg-gradient-to-r from-emerald-500 via-purple-600 to-blue-500 rounded-full blur-xl opacity-80 group-hover:opacity-100 transition duration-500 animate-glow"></div>
+                <div class="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full p-1.5 bg-slate-950 border-2 border-emerald-400/50 overflow-hidden shadow-2xl">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_XramnEu-JCQtFAqDV3PrjyaPSUyeJbHDb0oaL4eboInK-wpDbWZaA9wb&s=10" alt="Bunny Dog Avatar" class="w-full h-full object-cover rounded-full group-hover:scale-105 transition duration-500">
+                </div>
+                <!-- Status Badge -->
+                <div class="absolute bottom-2 right-2 px-3 py-1 bg-slate-950/90 border border-emerald-500/50 rounded-full text-xs font-bold text-emerald-400 flex items-center gap-1.5 shadow-lg backdrop-blur-md">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>ONLINE</span>
+                </div>
+            </div>
+
+            <!-- Title & Subtitle -->
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-4">
+                Xin chào, mình là <br class="sm:hidden" />
+                <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(34,197,94,0.4)]">
+                    Bunny Dog
+                </span>
+            </h1>
+
+            <p class="max-w-2xl text-base sm:text-xl text-slate-300 font-normal leading-relaxed mb-8">
+                Streamer Minecraft chính hiệu 🎮 Khám phá thế giới khối vuông kỳ diệu, xây dựng những công trình tuyệt vời và giao lưu cùng mọi người!
+            </p>
+
+            <!-- Quick Action Links -->
+            <div class="flex flex-wrap justify-center gap-4 w-full max-w-2xl">
+                <a href="https://www.youtube.com/@bhunny169" target="_blank" rel="noopener" class="flex-1 min-w-[150px] py-3.5 px-5 rounded-2xl bg-youtube text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-red-600/40 hover:bg-red-600 hover:scale-105 transition-all text-sm sm:text-base">
+                    <i class="fab fa-youtube text-xl"></i> YouTube Chính
+                </a>
+                <a href="https://www.youtube.com/watch?v=QDia3e12czc" target="_blank" rel="noopener" class="flex-1 min-w-[150px] py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/40 hover:scale-105 transition-all text-sm sm:text-base border border-emerald-400/30">
+                    <i class="fas fa-play-circle text-xl"></i> Kênh Phụ / Video
+                </a>
+                <a href="https://discord.gg/kuMTYSBNeN" target="_blank" rel="noopener" class="flex-1 min-w-[150px] py-3.5 px-5 rounded-2xl bg-discord text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/40 hover:bg-indigo-600 hover:scale-105 transition-all text-sm sm:text-base">
+                    <i class="fab fa-discord text-xl"></i> Discord
+                </a>
+            </div>
+        </section>
+
+
+        <!-- STREAM SCHEDULE SECTION -->
+        <section id="schedule" class="glass-card rounded-3xl p-8 sm:p-12 relative overflow-hidden">
+            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="text-center space-y-3 mb-10">
+                <div class="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+                    Lịch Lên Sóng Hàng Tuần
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">
+                    Thời Gian Stream Minecraft
+                </h2>
+                <p class="text-slate-400 text-sm">Ghi lịch lại để không bỏ lỡ những buổi live vui nhộn cùng Bunny Dog nhé!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Schedule Box 1 -->
+                <div class="p-6 rounded-2xl bg-slate-950/80 border border-emerald-500/30 flex items-start gap-4 shadow-lg">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-2xl flex-shrink-0">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-lg text-white">Thứ 7 & Chủ Nhật</h3>
+                            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">Cố Định</span>
+                        </div>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            Lên sóng đều đặn vào hai ngày cuối tuần với các nội dung khám phá thế giới Minecraft, xây dựng và tương tác vui vẻ với người xem.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Schedule Box 2 -->
+                <div class="p-6 rounded-2xl bg-slate-950/80 border border-purple-500/30 flex items-start gap-4 shadow-lg">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-400 flex items-center justify-center text-2xl flex-shrink-0">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-lg text-white">Thứ 2 đến Thứ 6</h3>
+                            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 text-xs font-bold">Lâu Lâu Live</span>
+                        </div>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            Thỉnh thoảng sẽ có những buổi live bất ngờ vào các buổi tối trong tuần khi hứng lên. Nhớ join Discord để nhận thông báo sớm nhất!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- SOCIAL HUBS SECTION -->
+        <section id="socials" class="space-y-8">
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">
+                    Kênh Trực Tuyến & <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">Cộng Đồng</span>
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base">Đăng ký kênh YouTube và tham gia server Discord ngay bây giờ!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- YOUTUBE MAIN -->
+                <div class="neon-border-yt">
+                    <div class="glass-card glass-card-interactive rounded-2xl p-6 h-full flex flex-col justify-between space-y-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-red-600/20 text-red-500 flex items-center justify-center text-2xl border border-red-500/30">
+                                    <i class="fab fa-youtube"></i>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-400 text-xs font-semibold border border-red-500/20">
+                                    Kênh Chính
+                                </span>
+                            </div>
+
+                            <div>
+                                <h3 class="text-xl font-bold text-white mb-1">YouTube Chính</h3>
+                                <p class="text-xs text-red-400 font-mono mb-2">@bhunny169</p>
+                                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                                    Nơi phát sóng trực tiếp và lưu trữ các video Minecraft nổi bật, những khoảnh khắc vui nhộn cùng cộng đồng.
+                                </p>
+                            </div>
+                        </div>
+
+                        <a href="https://www.youtube.com/@bhunny169" target="_blank" rel="noopener" class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-center text-sm shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2">
+                            <span>Truy Cập YouTube</span>
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- YOUTUBE SECONDARY / KÊNH PHỤ -->
+                <div class="neon-border-green">
+                    <div class="glass-card glass-card-interactive rounded-2xl p-6 h-full flex flex-col justify-between space-y-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl border border-emerald-500/30">
+                                    <i class="fas fa-video"></i>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20">
+                                    Kênh Phụ / Video
+                                </span>
+                            </div>
+
+                            <div>
+                                <h3 class="text-xl font-bold text-white mb-1">Kênh Phụ Minecraft</h3>
+                                <p class="text-xs text-emerald-400 font-mono mb-2">Video Đặc Biệt</p>
+                                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                                    Thưởng thức ngay video thú vị trên kênh phụ của Bunny Dog với những nội dung hấp dẫn không thể bỏ qua.
+                                </p>
+                            </div>
+                        </div>
+
+                        <a href="https://www.youtube.com/watch?v=QDia3e12czc" target="_blank" rel="noopener" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-center text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2">
+                            <span>Mở Kênh / Xem Video</span>
+                            <i class="fas fa-external-link-alt text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- DISCORD SERVER -->
+                <div class="neon-border-discord">
+                    <div class="glass-card glass-card-interactive rounded-2xl p-6 h-full flex flex-col justify-between space-y-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-2xl border border-indigo-500/30">
+                                    <i class="fab fa-discord"></i>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold border border-indigo-500/20">
+                                    Cộng Đồng
+                                </span>
+                            </div>
+
+                            <div>
+                                <h3 class="text-xl font-bold text-white mb-1">Discord Server</h3>
+                                <p class="text-xs text-indigo-400 font-mono mb-2">discord.gg/kuMTYSBNeN</p>
+                                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                                    Giao lưu trực tiếp với Bunny Dog và các thành viên khác trong server, tìm cạ chơi chung Minecraft cực vui.
+                                </p>
+                            </div>
+                        </div>
+
+                        <a href="https://discord.gg/kuMTYSBNeN" target="_blank" rel="noopener" class="w-full py-3 rounded-xl bg-discord hover:bg-indigo-600 text-white font-bold text-center text-sm shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2">
+                            <span>Tham Gia Discord</span>
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800/80 py-8 text-center text-xs text-slate-500 mt-12">
+        <div class="max-w-6xl mx-auto px-4 space-y-2">
+            <p>© <span id="year"></span> <strong>Bunny Dog</strong>. Minecraft Streamer Hub.</p>
+            <p class="text-slate-600">Sáng tạo, đam mê và kết nối thế giới khối vuông.</p>
+        </div>
+    </footer>
+
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Set dynamic current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        /* =========================================================
+           1. DYNAMIC CANVAS PARTICLE BACKGROUND
+           ========================================================= */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.radius = Math.random() * 2 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.alpha = Math.random() * 0.6 + 0.2;
+                this.color = Math.random() > 0.5 ? '#22c55e' : '#38bdf8';
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        const particles = [];
+        const particleCount = Math.min(Math.floor(window.innerWidth / 15), 70);
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+
+        /* =========================================================
+           2. CUSTOM GLOWING CURSOR WITH TRAIL PARTICLES
+           ========================================================= */
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorRing = document.getElementById('cursor-ring');
+
+        let mouseX = -100;
+        let mouseY = -100;
+        let ringX = -100;
+        let ringY = -100;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+
+            cursorDot.style.left = `${mouseX}px`;
+            cursorDot.style.top = `${mouseY}px`;
+
+            if (Math.random() < 0.3) {
+                createTrailParticle(mouseX, mouseY);
+            }
+        });
+
+        function animateCursorRing() {
+            ringX += (mouseX - ringX) * 0.15;
+            ringY += (mouseY - ringY) * 0.15;
+
+            cursorRing.style.left = `${ringX}px`;
+            cursorRing.style.top = `${ringY}px`;
+
+            requestAnimationFrame(animateCursorRing);
+        }
+        animateCursorRing();
+
+        function createTrailParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'trail-particle';
+            
+            const size = Math.random() * 6 + 4;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            const colors = ['#22c55e', '#38bdf8', '#a855f7', '#10b981'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.backgroundColor = color;
+            particle.style.boxShadow = `0 0 10px ${color}`;
+
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 800);
+        }
+
+        const interactiveElements = document.querySelectorAll('a, button');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorRing.style.width = '55px';
+                cursorRing.style.height = '55px';
+                cursorRing.style.borderColor = '#22c55e';
+                cursorDot.style.backgroundColor = '#22c55e';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorRing.style.width = '38px';
+                cursorRing.style.height = '38px';
+                cursorRing.style.borderColor = 'rgba(34, 197, 94, 0.6)';
+                cursorDot.style.backgroundColor = '#22c55e';
+            });
+        });
+
+
+        /* =========================================================
+           3. GOOGLE DRIVE BACKGROUND AUDIO PLAYER
+           ========================================================= */
+        const bgSoundBtn = document.getElementById('bg-sound-btn');
+        const soundBtnText = document.getElementById('sound-btn-text');
+        const soundIcon = document.getElementById('sound-icon');
+        const bgAudio = document.getElementById('bg-audio');
+
+        let isPlaying = false;
+
+        bgSoundBtn.addEventListener('click', () => {
+            if (!isPlaying) {
+                bgAudio.play().then(() => {
+                    isPlaying = true;
+                    soundBtnText.textContent = "Tắt Nhạc";
+                    soundIcon.className = "fas fa-pause text-emerald-400";
+                    bgSoundBtn.classList.add('bg-emerald-500/20', 'border-emerald-400');
+                }).catch(err => {
+                    console.log("Audio play failed:", err);
+                });
+            } else {
+                bgAudio.pause();
+                isPlaying = false;
+                soundBtnText.textContent = "Bật Nhạc";
+                soundIcon.className = "fas fa-play text-emerald-400";
+                bgSoundBtn.classList.remove('bg-emerald-500/20', 'border-emerald-400');
+            }
+        });
+    </script>
+</body>
+</html>
